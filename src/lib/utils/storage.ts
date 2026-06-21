@@ -1,8 +1,8 @@
 import type { CompressionSettings, FormatPreference } from "./types";
 
-// v3 was used during the PNG mode rollout before we changed the reload defaults.
-// v5 introduced the Auto default (Safe + Smaller candidates).
-const STORAGE_KEY = "pixelpress:last-settings:v5";
+// Fresh "smol:" namespace; v1 stores the current settings shape (Auto default,
+// with the quality slider reset to default on load).
+const STORAGE_KEY = "smol:last-settings:v1";
 
 // The quality slider intentionally resets to this on every reload rather than
 // persisting, so each visit starts from the same safe default.
