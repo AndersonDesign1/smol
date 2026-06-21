@@ -4,9 +4,11 @@ import type {
   OutputFormat,
 } from "../utils/types";
 
+// level is oxipng's optimization effort (0-6). 4 trades a little more CPU for
+// meaningfully smaller lossless PNGs than the previous level 2.
 const pngOptimiseOptions = {
   interlace: false,
-  level: 2,
+  level: 4,
   optimiseAlpha: true,
 } as const;
 

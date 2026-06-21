@@ -1,8 +1,14 @@
 import type { CompressionSettings, FormatPreference } from "./types";
 
 // v3 was used during the PNG mode rollout before we changed the reload defaults.
-const STORAGE_KEY = "pixelpress:last-settings:v4";
+// v5 introduced the Auto default (Safe + Smaller candidates).
+const STORAGE_KEY = "pixelpress:last-settings:v5";
+
+// The quality slider intentionally resets to this on every reload rather than
+// persisting, so each visit starts from the same safe default.
+export const DEFAULT_QUALITY = 90;
 const validFormats: FormatPreference[] = [
+  "auto",
   "original",
   "jpeg",
   "png",
@@ -43,10 +49,13 @@ export function loadSettings(): CompressionSettings | null {
       return null;
     }
 
+    // Always reopen in Auto mode at the default quality (PNG preferences still
+    // persist), so the streamlined default experience is the same every visit.
     return {
       ...parsed,
-      format: "original",
+      format: "auto",
       lossless: false,
+      quality: DEFAULT_QUALITY,
     };
   } catch {
     return null;

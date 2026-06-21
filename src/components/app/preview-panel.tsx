@@ -87,28 +87,41 @@ function variantSummary(variant: CompressionVariant, originalSize: number) {
   };
 }
 
-function formatUpgradeHint(
+// Auto keeps the quality-safe pick selected by default. When a different
+// candidate is meaningfully smaller, surface it as a one-click suggestion
+// instead of switching for the user.
+const SUGGESTION_SAVINGS_RATIO = 0.85; // offer only when >=15% smaller
+
+function getCompressMoreSuggestion(
   job: CompressionJob,
-  variant: CompressionVariant | null
+  activeVariant: CompressionVariant | null
 ) {
+  if (job.bestVariantId === null || job.bestVariantId === job.activeVariantId) {
+    return null;
+  }
+
+  const smaller = job.variants.find(
+    (variant) => variant.id === job.bestVariantId
+  );
   if (
-    !(variant?.output && variant.sizeDelta !== null && variant.sizeDelta < 0)
+    !(smaller?.output && smaller.sizeDelta !== null && smaller.sizeDelta < 0)
   ) {
     return null;
   }
 
-  if (variant.format === "webp" || variant.format === "avif") {
+  const referenceSize = activeVariant?.output?.size ?? job.file.size;
+  if (smaller.output.size > referenceSize * SUGGESTION_SAVINGS_RATIO) {
     return null;
   }
 
-  const savings = savingsPercent(variant.sizeDelta, job.file.size);
-  if (savings >= 10) {
-    return null;
-  }
-
-  const sourceLabel = variantFormatLabel(variant.format, variant.strategy);
-
-  return `${sourceLabel} only saved ${savings}%. Try WebP or AVIF if you want a much smaller export.`;
+  return {
+    id: smaller.id,
+    label: variantFormatLabel(smaller.format, smaller.strategy),
+    savedMore: savingsPercent(
+      smaller.output.size - referenceSize,
+      referenceSize
+    ),
+  };
 }
 
 function compareImage(src: string, alt: string) {
@@ -161,11 +174,6 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
     );
   }
 
-  const bestVariant =
-    job.bestVariantId === null
-      ? null
-      : (job.variants.find((variant) => variant.id === job.bestVariantId) ??
-        null);
   let activeSummary = {
     text: "The original is still the best call so far.",
     tone: "text-white/62",
@@ -183,7 +191,7 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
     activeOutputUrl &&
     activeVariant?.output
   );
-  const upgradeHint = formatUpgradeHint(job, activeVariant ?? bestVariant);
+  const suggestion = getCompressMoreSuggestion(job, activeVariant);
   const compareContent =
     compareReady && originalUrl && activeOutputUrl ? (
       <div className="h-full w-full overflow-hidden p-4">
@@ -259,17 +267,35 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
               {activeVariant.note}
             </p>
           ) : null}
-          {upgradeHint ? (
-            <p className="text-[0.76rem] text-amber-300/90 leading-5">
-              {upgradeHint}
-            </p>
-          ) : null}
         </div>
 
-        <div className="rounded-[0.5rem] border border-emerald-400/18 bg-emerald-400/8 px-3 py-1.5 font-medium text-[0.78rem] text-emerald-200">
-          Compare
-        </div>
+        {activeVariant?.output &&
+        activeVariant.sizeDelta !== null &&
+        activeVariant.sizeDelta < 0 ? (
+          <div className="shrink-0 rounded-[0.5rem] border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 font-semibold text-[0.85rem] text-emerald-200 tabular-nums">
+            −{savingsPercent(activeVariant.sizeDelta, job.file.size)}%
+          </div>
+        ) : null}
       </div>
+
+      {suggestion ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-border border-b bg-emerald-400/[0.06] px-4 py-2.5">
+          <span className="text-[0.82rem] text-emerald-100/90">
+            <span className="font-semibold text-emerald-200">
+              {suggestion.label}
+            </span>{" "}
+            saves {suggestion.savedMore}% more, and looks the same.
+          </span>
+          <button
+            className="ml-auto inline-flex items-center gap-1.5 rounded-[0.55rem] border border-emerald-400/40 bg-emerald-400/15 px-3 py-1.5 font-medium text-[0.8rem] text-emerald-50 transition hover:bg-emerald-400/25"
+            onClick={() => onSelectVariant(suggestion.id)}
+            type="button"
+          >
+            Use {suggestion.label}
+            <Icon icon="hugeicons:arrow-right-01" width={14} />
+          </button>
+        </div>
+      ) : null}
 
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-border border-b px-4 py-3">
         <button
@@ -282,15 +308,14 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
           type="button"
         >
           <span className="font-medium">Original</span>
-          <span className="text-white/45">Default</span>
         </button>
 
         {job.variants
           .slice()
           .sort((a, b) => b.createdAt - a.createdAt)
           .map((variant) => {
-            const isBest = bestVariant?.id === variant.id;
-            const isLatest = latestVariant?.id === variant.id;
+            const isActive = job.activeVariantId === variant.id;
+            const isSmallest = job.bestVariantId === variant.id;
             let variantTone =
               "border-border bg-transparent text-muted hover:bg-white/4";
 
@@ -315,9 +340,13 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
                 <span className="font-medium">
                   {variantFormatLabel(variant.format, variant.strategy)}
                 </span>
-                {isBest && <span className="text-emerald-300">Best</span>}
-                {!isBest && isLatest && (
-                  <span className="text-white/45">Latest</span>
+                {isActive &&
+                  variant.status !== "error" &&
+                  variant.status !== "larger-than-original" && (
+                    <span className="text-emerald-300">Recommended</span>
+                  )}
+                {!isActive && isSmallest && variant.status === "done" && (
+                  <span className="text-emerald-300/80">Smaller</span>
                 )}
                 {variant.status === "larger-than-original" && (
                   <span className="text-[0.72rem] text-amber-300">Larger</span>
