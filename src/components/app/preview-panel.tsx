@@ -340,11 +340,9 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
                 <span className="font-medium">
                   {variantFormatLabel(variant.format, variant.strategy)}
                 </span>
-                {isActive &&
-                  variant.status !== "error" &&
-                  variant.status !== "larger-than-original" && (
-                    <span className="text-emerald-300">Recommended</span>
-                  )}
+                {isActive && variant.status === "done" && (
+                  <span className="text-emerald-300">Recommended</span>
+                )}
                 {!isActive && isSmallest && variant.status === "done" && (
                   <span className="text-emerald-300/80">Smaller</span>
                 )}

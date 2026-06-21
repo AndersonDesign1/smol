@@ -59,6 +59,9 @@ export interface CompressionVariant {
 
 export interface CompressionJob {
   activeVariantId: string | null;
+  // True once the user explicitly picks a variant chip, so later worker events
+  // for other variants don't reset their choice. Cleared on a re-run.
+  activeVariantPinned: boolean;
   bestVariantId: string | null;
   error?: string;
   file: File;

@@ -6,10 +6,10 @@
 //   bun run build && node scripts/serve-dist-coi.mjs   (serves on :4321)
 import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join } from "node:path";
+import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = fileURLToPath(new URL("../dist/", import.meta.url));
+const root = resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const port = Number(process.env.PORT) || 4321;
 
 const mime = {
@@ -35,23 +35,39 @@ createServer(async (req, res) => {
   res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
   res.setHeader("Origin-Agent-Cluster", "?1");
 
-  let pathname = decodeURIComponent(
-    new URL(req.url, "http://localhost").pathname
-  );
+  let pathname;
+  try {
+    pathname = decodeURIComponent(
+      new URL(req.url, "http://localhost").pathname
+    );
+  } catch {
+    res.statusCode = 400;
+    res.end("Bad request");
+    return;
+  }
   if (pathname.endsWith("/")) {
     pathname += "index.html";
   }
 
-  let file = join(root, pathname);
+  // Resolve within root and reject any path traversal (e.g. ../).
+  let file = resolve(root, `.${pathname}`);
+  if (file !== root && !file.startsWith(root + sep)) {
+    res.statusCode = 403;
+    res.end("Forbidden");
+    return;
+  }
+
   let info = await stat(file).catch(() => null);
   if (info?.isDirectory()) {
-    file = join(file, "index.html");
+    file = resolve(file, "index.html");
     info = await stat(file).catch(() => null);
-  }
-  if (!info) {
+  } else if (!info) {
     // Try directory-style route (e.g. /about -> /about/index.html)
-    file = join(root, pathname, "index.html");
-    info = await stat(file).catch(() => null);
+    const indexFile = resolve(file, "index.html");
+    info = await stat(indexFile).catch(() => null);
+    if (info) {
+      file = indexFile;
+    }
   }
   if (!info) {
     res.statusCode = 404;

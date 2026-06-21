@@ -535,6 +535,12 @@ function applyWorkerEventToJob(
     return job;
   }
 
+  // Ignore progress/results for Auto candidates that were superseded and pruned
+  // on a re-run, so their stale completions can't disturb the current variants.
+  if (!job.variants.some((variant) => variant.id === event.variantId)) {
+    return job;
+  }
+
   const variants = job.variants.map((variant) =>
     updateVariantFromWorker(job, variant, event)
   );
@@ -550,8 +556,10 @@ function applyWorkerEventToJob(
   const nextActiveCandidate = autoMode
     ? getSafeVariantId(variants, sourceFormat)
     : nextBestVariantId;
+  // Keep the user's explicit pick (a clicked chip) and never move selection off
+  // an errored variant.
   const activeVariantId =
-    finishedVariant?.status === "error"
+    job.activeVariantPinned || finishedVariant?.status === "error"
       ? job.activeVariantId
       : nextActiveCandidate;
 
@@ -745,6 +753,7 @@ export default function CompressorApp() {
         return {
           ...entry,
           activeVariantId: null,
+          activeVariantPinned: false,
           error: undefined,
           status: "processing",
           variants,
@@ -815,6 +824,7 @@ export default function CompressorApp() {
 
         return {
           activeVariantId: null,
+          activeVariantPinned: false,
           bestVariantId: null,
           file,
           id: jobId,
@@ -940,7 +950,9 @@ export default function CompressorApp() {
   }
 
   async function downloadAllZip() {
-    const targets = targetedJobs(jobs);
+    // Only zip finished jobs; skip anything still processing/queued so we never
+    // bundle an original in place of an unfinished compression.
+    const targets = targetedJobs(jobs).filter((job) => job.status === "done");
     if (!targets.length) {
       return;
     }
@@ -984,7 +996,9 @@ export default function CompressorApp() {
   function setActiveVariant(sourceId: string, variantId: string | null) {
     setJobs((current) =>
       current.map((job) =>
-        job.id === sourceId ? { ...job, activeVariantId: variantId } : job
+        job.id === sourceId
+          ? { ...job, activeVariantId: variantId, activeVariantPinned: true }
+          : job
       )
     );
   }

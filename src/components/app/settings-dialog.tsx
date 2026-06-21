@@ -103,9 +103,11 @@ export function SettingsDialog({
   const pngOutputActive = explicitFormat === "png";
   const losslessSupported =
     explicitFormat === "png" || explicitFormat === "webp";
+  // Quality only does nothing for lossless PNG and lossless WebP. Other formats
+  // (JPEG, AVIF, original) keep the slider live even if `lossless` is stale.
   const qualityDisabled =
     (pngOutputActive && settings.pngMode === "lossless") ||
-    (!pngOutputActive && settings.lossless);
+    (explicitFormat === "webp" && settings.lossless);
   const pngHelpText = getPngHelpText(settings);
 
   return (
