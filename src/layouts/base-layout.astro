@@ -39,7 +39,7 @@ const navLinkClass = (href: string) =>
     currentPath === href ? "text-text" : "text-white/55 hover:text-text",
   ].join(" ");
 const contentClass = fullWidth
-  ? "w-full py-0"
+  ? "h-full min-h-0 w-full"
   : [containerClass, "grid gap-12 py-10 sm:gap-14 sm:py-14"].join(" ");
 ---
 
@@ -49,23 +49,26 @@ const contentClass = fullWidth
     <SiteHead title={title} description={description} canonical={canonical} />
   </head>
   <body class="min-h-screen bg-bg-deep font-body text-text">
-    <div class="min-h-screen">
+    <div class:list={["min-h-screen", fullWidth && "flex h-[100dvh] flex-col"]}>
       <header
         class="sticky top-0 z-20 border-b border-border bg-[rgb(5_5_5_/_0.92)] backdrop-blur-sm"
       >
         <div
           class:list={[
             containerClass,
-            "flex items-center justify-between gap-6 py-3",
+            "flex items-center justify-between gap-4 py-3",
           ]}
         >
           <a
             class="font-display text-base tracking-[-0.05em] text-text no-underline"
             href="/"
           >
-            PixelPress
+            Smol
           </a>
-          <nav class="flex flex-wrap items-center gap-5" aria-label="Primary">
+          <nav
+            class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-sm max-sm:justify-end"
+            aria-label="Primary"
+          >
             {nav.map((item) => (
               /* biome-ignore lint/correctness/useJsxKeyInIterable: Astro iterables do not use React keys. */
               <a
@@ -95,7 +98,7 @@ const contentClass = fullWidth
           </nav>
         </div>
       </header>
-      <main class="py-0">
+      <main class:list={["py-0", fullWidth && "min-h-0 flex-1"]}>
         <div class={contentClass}><slot /></div>
       </main>
       {!hideFooter && (
@@ -118,7 +121,8 @@ const contentClass = fullWidth
                   >.
                 </p>
                 <p class="text-white/50">
-                  Local-first image compression with lossless oxipng and lossy pngquant-style PNG output.
+                  Image compression that runs entirely in your browser. Nothing
+                  ever gets uploaded.
                 </p>
               </div>
               <div class="grid gap-2 sm:justify-items-end">

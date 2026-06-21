@@ -1,0 +1,8 @@
+# Cross-origin isolation so the wasm image codecs (oxipng, etc.) can run
+# multi-threaded via SharedArrayBuffer. `credentialless` keeps cross-origin
+# subresources (Google Fonts, Iconify) working; browsers without it (Safari)
+# simply fall back to the single-threaded codecs.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+  Origin-Agent-Cluster: ?1

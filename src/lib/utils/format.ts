@@ -9,6 +9,7 @@ export const formatOptions: Array<{
   label: string;
   value: FormatPreference;
 }> = [
+  { label: "Auto", value: "auto" },
   { label: "Original", value: "original" },
   { label: "PNG", value: "png" },
   { label: "JPEG", value: "jpeg" },
@@ -38,6 +39,10 @@ export function outputExtension(format: OutputFormat): string {
 }
 
 export function formatLabel(format: FormatPreference): string {
+  if (format === "auto") {
+    return "Auto";
+  }
+
   if (format === "original") {
     return "Original";
   }
@@ -118,7 +123,10 @@ export function resolveOutputFormat(
   file: Pick<File, "name" | "type">,
   preferredFormat: FormatPreference
 ): OutputFormat {
-  if (preferredFormat !== "original") {
+  // "auto" and "original" both resolve to the source format here; Auto's
+  // multi-format fan-out happens earlier in buildCompressionTasks, so any
+  // task reaching this point already carries a concrete format.
+  if (preferredFormat !== "original" && preferredFormat !== "auto") {
     return preferredFormat;
   }
 
@@ -161,7 +169,7 @@ export function buildSettingsForFormat(
     pngMode = "lossless";
   } else if (format === "webp") {
     lossless = settings.lossless;
-  } else if (format === "original") {
+  } else if (format === "original" || format === "auto") {
     pngMode = "lossless";
   }
 
