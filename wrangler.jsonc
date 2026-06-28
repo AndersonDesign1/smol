@@ -1,0 +1,18 @@
+{
+  // Cloudflare Workers config — serves the static Astro build (./dist) as a
+  // static-assets-only Worker. No server code; the `_headers` file in the build
+  // output drives the cross-origin isolation headers the wasm codecs need.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smolpic",
+  "compatibility_date": "2026-06-23",
+  "assets": {
+    "directory": "./dist"
+  },
+  // Custom domain routes. These auto-create the DNS records once smolpic.xyz is
+  // an active zone in this Cloudflare account. Remove/comment until the zone is
+  // active if you want to deploy to *.workers.dev first.
+  "routes": [
+    { "pattern": "smolpic.xyz", "custom_domain": true },
+    { "pattern": "www.smolpic.xyz", "custom_domain": true }
+  ]
+}

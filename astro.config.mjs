@@ -4,7 +4,7 @@ import { defineConfig } from "astro/config";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  site: "https://pixelpress.app",
+  site: "https://smolpic.xyz",
   output: "static",
   redirects: {
     "/app": "/",
