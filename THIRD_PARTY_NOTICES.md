@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-PixelPress includes third-party software. This file highlights the packages directly introduced for lossy PNG compression and browser-side WASM loading.
+Smol includes third-party software. This file highlights the packages directly introduced for lossy PNG compression and browser-side WASM loading.
 
 ## imagequant
 

@@ -2,19 +2,19 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "pixelpress-dev",
+      "name": "smol-dev",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev"],
       "port": 4321
     },
     {
-      "name": "pixelpress-preview",
+      "name": "smol-preview",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "preview"],
       "port": 4321
     },
     {
-      "name": "pixelpress-coi",
+      "name": "smol-coi",
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/serve-dist-coi.mjs"],
       "port": 4321

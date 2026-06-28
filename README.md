@@ -1,6 +1,6 @@
-# PixelPress
+# Smol
 
-PixelPress is a local-first image compression app built with Astro, React, and browser-side codecs. You drop in a batch of images, the work happens in a web worker, and you get to compare the results before downloading anything.
+Smol is a local-first image compression app built with Astro, React, and browser-side codecs. You drop in a batch of images, the work happens in a web worker, and you get to compare the results before downloading anything.
 
 There is no upload step and no backend doing secret image work somewhere else. The whole point is to keep it simple: run it locally, compress a pile of images, keep the version that actually looks worth keeping, and move on.
 
@@ -48,7 +48,7 @@ bun run dev
 
 The dev server runs on `http://localhost:4321`.
 
-The default deployment target in this repo is Cloudflare Workers at `https://pixelpress.workers.dev`. If you attach a custom domain, update Astro `site` in `astro.config.mjs` so canonical URLs point at the final hostname.
+This repo deploys to Cloudflare Workers (see `wrangler.jsonc` and `.github/workflows/deploy.yml`) and is served at `https://smolpic.xyz`. Astro `site` in `astro.config.mjs` is set to that domain so canonical URLs resolve correctly.
 
 ## Commands
 
@@ -73,10 +73,10 @@ bun run deploy
 
 ## Licensing
 
-PixelPress is licensed under `GPL-3.0-or-later`.
+Smol is licensed under `GPL-3.0-or-later`.
 
 Lossy PNG compression is powered by `imagequant`, which wraps `libimagequant` for browser/WASM usage under GPL-compatible terms. See `THIRD_PARTY_NOTICES.md` for package references used by this repo.
 
 ## Why it exists
 
-This started from a pretty ordinary annoyance: a lot of image tools are either too limited, too fussy, or too eager to push you toward an upload flow. PixelPress is meant to feel lighter than that. Open it, drop files in, compare the outputs, download the ones you want, done.
+This started from a pretty ordinary annoyance: a lot of image tools are either too limited, too fussy, or too eager to push you toward an upload flow. Smol is meant to feel lighter than that. Open it, drop files in, compare the outputs, download the ones you want, done.
