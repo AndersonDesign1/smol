@@ -10,6 +10,7 @@ import {
   variantFormatLabel,
 } from "../../lib/utils/format";
 import type { CompressionJob, CompressionVariant } from "../../lib/utils/types";
+import { isSecondaryPending, visibleVariants } from "../../lib/utils/variants";
 
 interface PreviewPanelProps {
   job?: CompressionJob;
@@ -96,6 +97,11 @@ function getCompressMoreSuggestion(
   job: CompressionJob,
   activeVariant: CompressionVariant | null
 ) {
+  // Don't surface the WebP suggestion while it's still held back from the chips.
+  if (isSecondaryPending(job)) {
+    return null;
+  }
+
   if (job.bestVariantId === null || job.bestVariantId === job.activeVariantId) {
     return null;
   }
@@ -310,7 +316,7 @@ export function PreviewPanel({ job, onSelectVariant }: PreviewPanelProps) {
           <span className="font-medium">Original</span>
         </button>
 
-        {job.variants
+        {visibleVariants(job)
           .slice()
           .sort((a, b) => b.createdAt - a.createdAt)
           .map((variant) => {

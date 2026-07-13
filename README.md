@@ -8,7 +8,7 @@ There is no upload step and no backend doing secret image work somewhere else. T
 
 - Compresses images in the browser with `@jsquash` codecs
 - Optimizes PNG output with `@jsquash/oxipng`
-- Compresses PNGs more aggressively with `imagequant` / `libimagequant`
+- Compresses PNGs more aggressively with `libimagequant-wasm` / `libimagequant`
 - Keeps PNG-preserving optimization separate from WebP and AVIF conversion
 - Generates multiple candidate variants when that helps
 - Lets you compare the original and compressed output side by side
@@ -21,7 +21,7 @@ There is no upload step and no backend doing secret image work somewhere else. T
 - React 19 for the compression workspace
 - Tailwind CSS v4 for styling
 - Web Workers for codec work and PNG optimization
-- `imagequant` WASM for lossy PNG quantization
+- `libimagequant-wasm` for lossy PNG quantization
 - Cloudflare Workers for deployment
 - Bun for installs and scripts
 
@@ -67,7 +67,7 @@ bun run deploy
 - Compression stays client-side, including PNG optimization
 - PNG now has two explicit modes:
   - `Optimized PNG` is lossless and uses `@jsquash/oxipng`
-  - `Compressed PNG` keeps PNG output but uses `imagequant` / `libimagequant` to reduce colors for better savings
+  - `Smart PNG` keeps PNG output but uses `libimagequant-wasm` to reduce colors for much better savings
 - Last-used settings are stored in `localStorage`
 - SharedArrayBuffer support is enabled in production through COOP/COEP headers in Astro middleware (`src/middleware.ts`)
 
@@ -75,7 +75,7 @@ bun run deploy
 
 Smol is licensed under `GPL-3.0-or-later`.
 
-Lossy PNG compression is powered by `imagequant`, which wraps `libimagequant` for browser/WASM usage under GPL-compatible terms. See `THIRD_PARTY_NOTICES.md` for package references used by this repo.
+Lossy PNG compression is powered by `libimagequant-wasm`, which wraps `libimagequant` for browser/WASM usage under GPL-compatible terms. See `THIRD_PARTY_NOTICES.md` for package references used by this repo.
 
 ## Why it exists
 

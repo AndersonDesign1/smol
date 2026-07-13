@@ -189,7 +189,7 @@ async function encodeForStrategy(
     }
 
     note =
-      "Compressed PNG fell back to a lossless PNG export after quantization failed.";
+      "Smart PNG fell back to a lossless PNG export after quantization failed.";
     bytesBuffer = await compressImageData(
       imageData,
       {

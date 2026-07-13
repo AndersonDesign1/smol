@@ -59,7 +59,7 @@ export function variantFormatLabel(
   }
 
   if (strategy === "png-quantized") {
-    return "Compressed PNG";
+    return "Smart PNG";
   }
 
   if (strategy === "png-encode-fallback") {

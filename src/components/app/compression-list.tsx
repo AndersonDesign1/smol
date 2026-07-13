@@ -5,6 +5,10 @@ import {
   variantFormatLabel,
 } from "../../lib/utils/format";
 import type { CompressionJob } from "../../lib/utils/types";
+import {
+  isSecondaryPending,
+  primaryAutoVariant,
+} from "../../lib/utils/variants";
 
 interface CompressionListProps {
   allChecked: boolean;
@@ -22,22 +26,36 @@ function jobSummary(job: CompressionJob) {
       ? null
       : (job.variants.find((variant) => variant.id === job.bestVariantId) ??
         null);
-  const latestVariant = job.variants.at(-1) ?? null;
+  // While the WebP candidate is held back (primary still working), report the
+  // primary so the sidebar matches the preview instead of jumping to "Best WebP"
+  // the moment WebP finishes — the two candidates run concurrently, so WebP can
+  // land first. Otherwise report the first still-processing variant.
+  const secondaryPending = isSecondaryPending(job);
+  const workingVariant = secondaryPending
+    ? primaryAutoVariant(job)
+    : (job.variants.find((variant) => variant.status === "processing") ??
+      job.variants.at(-1) ??
+      null);
+  const noteVariant =
+    bestVariant ?? job.variants.find((variant) => variant.note) ?? null;
 
   let summary = "The original is still the smallest.";
   let summaryClassName = "text-white/62";
 
-  if (
+  if (secondaryPending && workingVariant) {
+    summary = `Trying ${variantFormatLabel(workingVariant.format, workingVariant.strategy)} now...`;
+    summaryClassName = "text-sky-300";
+  } else if (
     bestVariant &&
     bestVariant.sizeDelta !== null &&
     bestVariant.sizeDelta < 0
   ) {
     summary = `Best ${variantFormatLabel(bestVariant.format, bestVariant.strategy)} saves ${savingsPercent(bestVariant.sizeDelta, job.file.size)}%`;
     summaryClassName = "text-emerald-300";
-  } else if (latestVariant?.status === "processing") {
-    summary = `Trying ${variantFormatLabel(latestVariant.format, latestVariant.strategy)} now...`;
+  } else if (workingVariant?.status === "processing") {
+    summary = `Trying ${variantFormatLabel(workingVariant.format, workingVariant.strategy)} now...`;
     summaryClassName = "text-sky-300";
-  } else if (latestVariant?.status === "larger-than-original") {
+  } else if (workingVariant?.status === "larger-than-original") {
     summary = "The latest try came out larger.";
     summaryClassName = "text-amber-300";
   } else if (job.status === "error") {
@@ -45,7 +63,7 @@ function jobSummary(job: CompressionJob) {
     summaryClassName = "text-rose-300";
   }
 
-  return { bestVariant, latestVariant, summary, summaryClassName };
+  return { noteVariant, summary, summaryClassName, workingVariant };
 }
 
 function statusIcon(status: CompressionJob["status"]) {
@@ -120,7 +138,8 @@ export function CompressionList({
       </div>
       <div className="flex-1 overflow-y-auto p-1.5">
         {jobs.map((job) => {
-          const { latestVariant, summary, summaryClassName } = jobSummary(job);
+          const { noteVariant, summary, summaryClassName, workingVariant } =
+            jobSummary(job);
           const active = selectedId === job.id;
           const variantCount = job.variants.length;
 
@@ -173,17 +192,17 @@ export function CompressionList({
                   </p>
                 ) : null}
 
-                {latestVariant?.note ? (
+                {noteVariant?.note ? (
                   <p className="pl-6 text-[0.73rem] text-white/45 leading-[1.35]">
-                    {latestVariant.note}
+                    {noteVariant.note}
                   </p>
                 ) : null}
 
-                {job.status === "processing" && latestVariant && (
+                {job.status === "processing" && workingVariant && (
                   <div className="mt-1 ml-6 h-0.5 overflow-hidden rounded-full bg-white/8">
                     <div
                       className="h-full rounded-full bg-[linear-gradient(90deg,#999,#ccc)] transition-[width] duration-200 ease-out"
-                      style={{ width: `${latestVariant.progress}%` }}
+                      style={{ width: `${workingVariant.progress}%` }}
                     />
                   </div>
                 )}

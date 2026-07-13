@@ -41,10 +41,10 @@ function getPngHelpText(settings: CompressionSettings) {
   }
 
   if (settings.pngMode === "compressed") {
-    return "Compressed PNG keeps PNG output and transparency, but reduces colors a little for stronger savings.";
+    return "Smart PNG keeps PNG output and transparency, quantizing colors for strong, fast savings that stay visually near-lossless.";
   }
 
-  return "PNG export stays lossless and preserves transparency. Switch to Compressed PNG for a smaller PNG without converting formats.";
+  return "PNG export stays lossless and preserves transparency. Switch to Smart PNG for a much smaller PNG without converting formats.";
 }
 
 const buttonBase =
@@ -229,7 +229,7 @@ export function SettingsDialog({
             <div className="flex overflow-hidden rounded-[0.55rem] border border-border">
               {[
                 { label: "Lossless PNG", value: "lossless" as const },
-                { label: "Compressed PNG", value: "compressed" as const },
+                { label: "Smart PNG", value: "compressed" as const },
               ].map((mode) => (
                 <button
                   className={`border-border border-r px-3 py-1.5 font-semibold text-[0.78rem] transition last:border-r-0 ${
