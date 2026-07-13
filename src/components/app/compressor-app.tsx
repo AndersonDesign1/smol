@@ -186,11 +186,11 @@ function buildAutoTasks(
   };
 
   if (sourceFormat === "png") {
-    // Default PNG candidate is near-lossless palette quantization (the TinyPNG
-    // approach) via libimagequant-wasm: keeps PNG format + transparency, does
-    // the heavy size cut fast, and stays visually near-lossless at quality 100 /
-    // 256 colors with dithering. WebP is the paired "smaller" pick. True lossless
-    // stays available via the PNG format menu ("Lossless PNG").
+    // Default PNG candidate is palette quantization (the TinyPNG approach) via
+    // libimagequant-wasm: keeps PNG format + transparency and does the heavy size
+    // cut fast. It follows the quality slider (down for smaller, up toward
+    // lossless), which is the primary result users see. WebP is the paired
+    // "smaller" pick; true lossless stays in the PNG menu ("Lossless PNG").
     return [
       {
         ...base,
@@ -200,7 +200,7 @@ function buildAutoTasks(
           lossless: true,
           pngColors: 256,
           pngMode: "compressed",
-          quality: 100,
+          quality,
         },
         strategy: "png-quantized",
       },
