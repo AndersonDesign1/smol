@@ -197,7 +197,7 @@ function buildAutoTasks(
         settings: {
           ...settings,
           format: "png",
-          lossless: true,
+          lossless: false,
           pngColors: 256,
           pngMode: "compressed",
           quality,

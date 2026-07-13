@@ -69,21 +69,24 @@ async function quantizePng(
   const { data, width, height } = imageData;
 
   const quantizer = new ImageQuantizer();
-  quantizer.setSpeed(IMAGEQUANT_SPEED);
-  quantizer.setQuality(QUANTIZE_MIN_QUALITY, quality);
-  quantizer.setMaxColors(colors);
-
-  const result = quantizer.quantizeImage(data, width, height);
   try {
-    result.setDithering(QUANTIZE_DITHERING);
-    const indices = result.getPaletteIndices(data, width, height);
-    const palette = result.getPalette();
-    const png = encode_palette_to_png(indices, palette, width, height);
-    // Copy out of wasm memory into a standalone ArrayBuffer for oxipng.
-    const quantized = png.slice().buffer;
-    return optimisePng(quantized, POST_QUANTIZE_LEVEL);
+    quantizer.setSpeed(IMAGEQUANT_SPEED);
+    quantizer.setQuality(QUANTIZE_MIN_QUALITY, quality);
+    quantizer.setMaxColors(colors);
+
+    const result = quantizer.quantizeImage(data, width, height);
+    try {
+      result.setDithering(QUANTIZE_DITHERING);
+      const indices = result.getPaletteIndices(data, width, height);
+      const palette = result.getPalette();
+      const png = encode_palette_to_png(indices, palette, width, height);
+      // Copy out of wasm memory into a standalone ArrayBuffer for oxipng.
+      const quantized = png.slice().buffer;
+      return optimisePng(quantized, POST_QUANTIZE_LEVEL);
+    } finally {
+      result.free();
+    }
   } finally {
-    result.free();
     quantizer.free();
   }
 }
