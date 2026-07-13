@@ -65,7 +65,7 @@ describe("formatLabel", () => {
 describe("variantFormatLabel", () => {
   it("returns correct labels for PNG strategies", () => {
     expect(variantFormatLabel("png", "png-optimize")).toBe("Optimized PNG");
-    expect(variantFormatLabel("png", "png-quantized")).toBe("Compressed PNG");
+    expect(variantFormatLabel("png", "png-quantized")).toBe("Smart PNG");
     expect(variantFormatLabel("png", "png-encode-fallback")).toBe("PNG export");
   });
 

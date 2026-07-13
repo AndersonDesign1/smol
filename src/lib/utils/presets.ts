@@ -41,8 +41,9 @@ export const presets: CompressionPreset[] = [
   },
   {
     id: "compressed-png",
-    label: "Compressed PNG",
-    description: "Keep PNG output but quantize colors for much better savings.",
+    label: "Smart PNG",
+    description:
+      "Keep PNG output but quantize colors for fast, near-lossless savings.",
     settings: {
       format: "png",
       quality: 78,

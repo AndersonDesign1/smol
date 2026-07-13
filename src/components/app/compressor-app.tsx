@@ -186,17 +186,23 @@ function buildAutoTasks(
   };
 
   if (sourceFormat === "png") {
+    // Default PNG candidate is palette quantization (the TinyPNG approach) via
+    // libimagequant-wasm: keeps PNG format + transparency and does the heavy size
+    // cut fast. It follows the quality slider (down for smaller, up toward
+    // lossless), which is the primary result users see. WebP is the paired
+    // "smaller" pick; true lossless stays in the PNG menu ("Lossless PNG").
     return [
       {
         ...base,
         settings: {
           ...settings,
           format: "png",
-          lossless: true,
-          pngMode: "lossless",
-          quality: 100,
+          lossless: false,
+          pngColors: 256,
+          pngMode: "compressed",
+          quality,
         },
-        strategy: "png-optimize",
+        strategy: "png-quantized",
       },
       webpSmaller,
     ];

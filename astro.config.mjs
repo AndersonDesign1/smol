@@ -19,7 +19,7 @@ export default defineConfig({
         "@jsquash/oxipng",
         "@jsquash/png",
         "@jsquash/webp",
-        "imagequant",
+        "libimagequant-wasm",
         "astro",
         "astro/runtime/client/dev-toolbar/entrypoint.js",
         "astro/virtual-modules/transitions-events.js",
