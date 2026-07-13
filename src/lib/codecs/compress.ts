@@ -52,6 +52,11 @@ function loadQuantizer(): Promise<QuantizerModule> {
       await mod.default({ module_or_path: quantizerWasmUrl });
       return mod;
     })();
+    // A cached rejected promise would keep Smart PNG disabled for the worker's
+    // whole lifetime; drop it on failure so the next call retries WASM init.
+    quantizerReady.catch(() => {
+      quantizerReady = undefined;
+    });
   }
   return quantizerReady;
 }
