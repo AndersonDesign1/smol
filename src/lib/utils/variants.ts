@@ -8,7 +8,9 @@ import type { CompressionJob, CompressionVariant } from "./types";
 export function primaryAutoVariant(
   job: CompressionJob
 ): CompressionVariant | null {
-  return job.variants.find((v) => v.auto && v.strategy !== "webp-lossy") ?? null;
+  return (
+    job.variants.find((v) => v.auto && v.strategy !== "webp-lossy") ?? null
+  );
 }
 
 // True while the primary auto candidate is still processing and a WebP secondary

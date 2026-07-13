@@ -41,7 +41,8 @@ const QUANTIZE_MIN_QUALITY = 0;
 // package, it passes RGBA by reference and doesn't copy the whole image into wasm
 // linear memory up front, so it survives large full-page screenshots that made
 // the previous library return a null pointer. Init runs once and is cached.
-type QuantizerModule = typeof import("libimagequant-wasm/wasm/libimagequant_wasm.js");
+type QuantizerModule =
+  typeof import("libimagequant-wasm/wasm/libimagequant_wasm.js");
 let quantizerReady: Promise<QuantizerModule> | undefined;
 
 function loadQuantizer(): Promise<QuantizerModule> {
